@@ -39,6 +39,15 @@ const filmeModel = {
       orderBy: { nome: 'asc' },
     });
   },
+
+  /**
+   * Cadastra um novo filme.
+   * @param {object} dados
+   * @returns {Promise<object>}
+   */
+  async create(dados) {
+    return prisma.filme.create({ data: dados });
+  },
 };
 
 module.exports = filmeModel;

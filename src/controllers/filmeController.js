@@ -51,6 +51,86 @@ const filmeController = {
       });
     }
   },
+  async criar(req, res) {
+    try {
+      const {
+        nome,
+        sinopse,
+        ano,
+        duracao,
+        genero,
+        diretor,
+        classificacao,
+        posterUrl,
+      } = req.body;
+
+      const camposObrigatorios = {
+        nome,
+        sinopse,
+        genero,
+        diretor,
+        classificacao,
+      };
+
+      const campoInvalido = Object.entries(camposObrigatorios).find(
+        ([, valor]) => typeof valor !== 'string' || valor.trim() === '',
+      );
+
+      if (campoInvalido) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem: `O campo "${campoInvalido[0]}" é obrigatório e não pode ser vazio.`,
+        });
+      }
+
+      const anoNumero = Number.parseInt(ano, 10);
+      const duracaoNumero = Number.parseInt(duracao, 10);
+
+      if (Number.isNaN(anoNumero) || anoNumero <= 0) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem: 'O campo "ano" deve ser um número inteiro positivo.',
+        });
+      }
+
+      if (Number.isNaN(duracaoNumero) || duracaoNumero <= 0) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem: 'O campo "duracao" deve ser um número inteiro positivo.',
+        });
+      }
+
+      if (posterUrl !== undefined && posterUrl !== null && typeof posterUrl !== 'string') {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem: 'O campo "posterUrl" deve ser uma string ou null.',
+        });
+      }
+
+      const filme = await filmeModel.create({
+        nome: nome.trim(),
+        sinopse: sinopse.trim(),
+        ano: anoNumero,
+        duracao: duracaoNumero,
+        genero: genero.trim(),
+        diretor: diretor.trim(),
+        classificacao: classificacao.trim(),
+        posterUrl: posterUrl?.trim() || null,
+      });
+
+      return res.status(201).json({
+        sucesso: true,
+        mensagem: 'Filme cadastrado com sucesso.',
+        dados: filme,
+      });
+    } catch (error) {
+      console.error('[filmeController.criar]', error);
+      return res.status(500).json({
+        sucesso: false,
+        mensagem: 'Erro interno ao cadastrar o filme.',
+      });
+    }
+  },
   async filtrarPorNome(req, res) {
     try {
       const { nome } = req.query;
